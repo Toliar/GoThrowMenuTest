@@ -70,7 +70,7 @@ namespace TestProject
             //options.BrowserExecutableLocation = @"C:\Users\a.rudakov\Downloads\firefoxsdk\bin\firefox.exe";
             options.BrowserExecutableLocation = @"c:\Program Files\Firefox Nightly\firefox.exe";
             driver = new FirefoxDriver(options);
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(2);
 
         }
 
@@ -96,7 +96,60 @@ namespace TestProject
                     Assert.That(driver.FindElements(By.CssSelector("td#content h1")).Count, Is.EqualTo(1));
                 }
             }
+        }
+        [TearDown]
+        public void stop()
+        {
+            driver?.Quit();
+            driver = null;
+        }
 
+        [TestFixture]
+        public class CheckStickerTest
+        {
+            private IWebDriver driver;
+            private WebDriverWait wait;
+
+            [SetUp]
+            public void start()
+            {
+                //driver = new FirefoxDriver();
+                FirefoxOptions options = new FirefoxOptions();
+                //options.UseLegacyImplementation = true;
+                //options.BrowserExecutableLocation = @"C:\Users\a.rudakov\Downloads\firefoxsdk\bin\firefox.exe";
+                options.BrowserExecutableLocation = @"c:\Program Files\Firefox Nightly\firefox.exe";
+                driver = new FirefoxDriver(options);
+                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+
+            }
+
+            [Test]
+            public void CheckStickerTests()
+            {
+                driver.Url = "http://localhost:8889/litecart/";
+                var mostPopulars = driver.FindElements(By.CssSelector("#box-most-popular .product"));
+                foreach (var box in mostPopulars)
+                {
+                    Assert.That(box.FindElements(By.CssSelector(".sticker")).Count, Is.EqualTo(1), "Найдено больше либо меньше 1 стикера в блоке Most popular");
+                }
+                var Campaigns = driver.FindElements(By.CssSelector("#box-most-popular .product"));
+                foreach (var box in Campaigns)
+                {
+                    Assert.That(box.FindElements(By.CssSelector(".sticker")).Count, Is.EqualTo(1), "Найдено больше либо меньше 1 стикера в блоке Campaigns");
+                }
+                var latestProducts = driver.FindElements(By.CssSelector("#box-latest-products"));
+                foreach (var box in latestProducts)
+                {
+                    Assert.That(box.FindElements(By.CssSelector(".sticker")).Count, Is.EqualTo(1), "Найдено больше либо меньше 1 стикера в блоке Campaigns");
+                }
+
+            }
+            [TearDown]
+            public void stop()
+            {
+                driver?.Quit();
+                driver = null;
+            }
         }
     }
 }
