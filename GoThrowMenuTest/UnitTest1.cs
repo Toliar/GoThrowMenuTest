@@ -132,12 +132,12 @@ namespace TestProject
                 {
                     Assert.That(box.FindElements(By.CssSelector(".sticker")).Count, Is.EqualTo(1), "Найдено больше либо меньше 1 стикера в блоке Most popular");
                 }
-                var Campaigns = driver.FindElements(By.CssSelector("#box-most-popular .product"));
+                var Campaigns = driver.FindElements(By.CssSelector("#box-campaigns .product"));
                 foreach (var box in Campaigns)
                 {
                     Assert.That(box.FindElements(By.CssSelector(".sticker")).Count, Is.EqualTo(1), "Найдено больше либо меньше 1 стикера в блоке Campaigns");
                 }
-                var latestProducts = driver.FindElements(By.CssSelector("#box-latest-products"));
+                var latestProducts = driver.FindElements(By.CssSelector("#box-latest-products .product"));
                 foreach (var box in latestProducts)
                 {
                     Assert.That(box.FindElements(By.CssSelector(".sticker")).Count, Is.EqualTo(1), "Найдено больше либо меньше 1 стикера в блоке Campaigns");
