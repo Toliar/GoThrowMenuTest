@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Collections;
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -151,5 +154,73 @@ namespace TestProject
                 driver = null;
             }
         }
+
+        [TestFixture]
+        public class CheckCountrySorting
+        {
+            private IWebDriver driver;
+            private WebDriverWait wait;
+
+            [SetUp]
+            public void start()
+            {
+                //driver = new FirefoxDriver();
+                FirefoxOptions options = new FirefoxOptions();
+                //options.UseLegacyImplementation = true;
+                //options.BrowserExecutableLocation = @"C:\Users\a.rudakov\Downloads\firefoxsdk\bin\firefox.exe";
+           //     options.BrowserExecutableLocation = @"c:\Program Files\Firefox Nightly\firefox.exe";
+            //    driver = new FirefoxDriver(options);
+
+                driver = new ChromeDriver();
+                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+
+            }
+
+            [Test]
+            public void CheckCountrySortingTest()
+            {
+                var countryList = new List<string>();
+                List<string> timeZoneList = new List<string>();
+                List<string> timeZonesForCheck = new List<string>();
+
+                driver.Url = "http://localhost:8889/litecart/admin/?app=countries&doc=countries";
+                driver.FindElement(By.Name("username")).SendKeys("admin");
+                driver.FindElement(By.Name("password")).SendKeys("admin");
+                driver.FindElement(By.Name("login")).Click();
+
+                var rows = driver.FindElements(By.CssSelector("form .dataTable .row"));
+                foreach (var row in rows)
+                {
+                    countryList.Add(row.FindElements(By.CssSelector("td"))[4].Text);
+                    if (row.FindElements(By.CssSelector("td"))[5].Text !="0")
+                    {
+                        timeZonesForCheck.Add(row.FindElement(By.CssSelector("a")).GetAttribute("href"));
+                    }
+
+                }
+                Assert.That(countryList, Is.Ordered, "Лист не отсортирован");
+
+                for (int j = 0; j< timeZonesForCheck.Count; j++)
+                {
+                    driver.Url = timeZonesForCheck[j];
+                    var rows2 = driver.FindElements(By.CssSelector("form #table-zones tr:not(.header)"));
+                    foreach (var row2 in rows2)
+                    {
+                        timeZoneList.Add(row2.FindElements(By.CssSelector("td"))[2].GetAttribute("outerText"));
+                    }
+                    timeZoneList.RemoveAt(timeZoneList.Count - 1);
+
+                    Assert.That(timeZoneList, Is.Ordered, "Лист зон по ссылке " + timeZonesForCheck[j].ToString()+" не отсортирован");
+                    timeZoneList.Clear();
+                }          
+            }
+            [TearDown]
+            public void stop()
+            {
+                driver?.Quit();
+                driver = null;
+            }
+        }
+
     }
 }
