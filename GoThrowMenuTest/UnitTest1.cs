@@ -222,5 +222,80 @@ namespace TestProject
             }
         }
 
+        [TestFixture]
+        public class CheckFirstCardItem
+        {
+            private IWebDriver driver;
+            private WebDriverWait wait;
+
+            [SetUp]
+            public void start()
+            {
+                  FirefoxOptions options = new FirefoxOptions();
+                  options.UseLegacyImplementation = true;
+                driver =new FirefoxDriver();
+                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(2);
+            }
+
+            [Test]
+            public void CheckFirstCardItemTest()
+            {
+                ProductData mainPageProduct = new ProductData();
+                ProductData pageProduct = new ProductData();
+                driver.Url = "http://localhost:8889/litecart/en/";
+                var firstCampaignsBox = driver.FindElements(By.CssSelector("#box-campaigns .product"))[0];
+                var regularPriceLocator = ".regular-price";
+                var campaignPriceLocator = ".campaign-price";
+
+                mainPageProduct.ProductName = firstCampaignsBox.FindElement(By.CssSelector(".name")).GetAttribute("textContent");
+                mainPageProduct.RegularPrice = firstCampaignsBox.FindElement(By.CssSelector(regularPriceLocator)).GetAttribute("textContent");
+                mainPageProduct.CampaignPrice = firstCampaignsBox.FindElement(By.CssSelector(campaignPriceLocator)).GetAttribute("textContent");
+                mainPageProduct.regularPriceColor = firstCampaignsBox.FindElement(By.CssSelector(regularPriceLocator)).GetCssValue("color");
+                mainPageProduct.CampaignPriceColor = firstCampaignsBox.FindElement(By.CssSelector(campaignPriceLocator)).GetCssValue("color");
+                mainPageProduct.RegularPriceFontSize = firstCampaignsBox.FindElement(By.CssSelector(regularPriceLocator)).GetCssValue("font-size");
+                mainPageProduct.CampaignPriceFontSize = firstCampaignsBox.FindElement(By.CssSelector(campaignPriceLocator)).GetCssValue("font-size");
+                mainPageProduct.TagRegularPrice = firstCampaignsBox.FindElement(By.CssSelector(regularPriceLocator)).GetAttribute("tagName");
+
+                firstCampaignsBox.Click();
+
+                var informationBox = driver.FindElement(By.CssSelector(".content .information"));
+
+                pageProduct.ProductName = driver.FindElement(By.CssSelector("#box-product h1")).GetAttribute("textContent");
+                pageProduct.RegularPrice = informationBox.FindElement(By.CssSelector(regularPriceLocator)).GetAttribute("textContent");
+                pageProduct.CampaignPrice = informationBox.FindElement(By.CssSelector(campaignPriceLocator)).GetAttribute("textContent");
+                pageProduct.regularPriceColor = informationBox.FindElement(By.CssSelector(regularPriceLocator)).GetCssValue("color");
+                pageProduct.CampaignPriceColor = informationBox.FindElement(By.CssSelector(campaignPriceLocator)).GetCssValue("color");
+                pageProduct.RegularPriceFontSize = informationBox.FindElement(By.CssSelector(regularPriceLocator)).GetCssValue("font-size");
+                pageProduct.CampaignPriceFontSize = informationBox.FindElement(By.CssSelector(campaignPriceLocator)).GetCssValue("font-size");
+                pageProduct.TagRegularPrice = informationBox.FindElement(By.CssSelector(regularPriceLocator)).GetAttribute("tagName");
+
+                Assert.That(mainPageProduct.ProductName, Is.EqualTo(pageProduct.ProductName), "Имена продукта отличается");
+
+                Assert.That(mainPageProduct.RegularPrice, Is.EqualTo(pageProduct.RegularPrice), "обычная цена продукта отличается");
+                Assert.That(mainPageProduct.CampaignPrice, Is.EqualTo(pageProduct.CampaignPrice), "обычная цена продукта отличается");
+
+                Assert.That(mainPageProduct.RegularPriceFontSize, Is.LessThan(mainPageProduct.CampaignPriceFontSize), "Цена не больше на главной");
+                Assert.That(pageProduct.RegularPriceFontSize, Is.LessThan(pageProduct.CampaignPriceFontSize), "Цена не больше на странице продукта");
+
+                Assert.That(mainPageProduct.TagRegularPrice, Is.EqualTo("S"), "Обычная цена не зачеркнута на главной");
+                Assert.That(mainPageProduct.TagRegularPrice, Is.EqualTo("S"), "Обычная цена не зачеркнута на странице продукта");
+
+                Assert.That(mainPageProduct.regularPriceColor, Does.Contain("119, 119, 119"), "обычная цена цвет отличается");
+                Assert.That(mainPageProduct.CampaignPriceColor, Does.Contain("204, 0, 0"), "Акционная цена цвет");
+
+                Assert.That(pageProduct.regularPriceColor, Does.Contain("102, 102, 102"), "обычная цена страница продукта цвет отличается");
+                Assert.That(pageProduct.CampaignPriceColor, Does.Contain("204, 0, 0"), "Акционная цена цвет страница продукта");
+            }
+
+            [TearDown]
+            public void stop()
+            {
+                driver?.Quit();
+                driver = null;
+            }
+
+
+        }
+
     }
 }
