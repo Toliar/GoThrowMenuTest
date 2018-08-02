@@ -16,6 +16,7 @@ namespace TestProject
         public string RegularPriceFontSize { get; set; }
         public string CampaignPriceFontSize { get; set; }
         public string TagRegularPrice { get; set; }
+        public string TagCampaignPrice { get; set; }
 
 
 

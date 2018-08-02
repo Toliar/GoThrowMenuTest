@@ -255,6 +255,7 @@ namespace TestProject
                 mainPageProduct.RegularPriceFontSize = firstCampaignsBox.FindElement(By.CssSelector(regularPriceLocator)).GetCssValue("font-size");
                 mainPageProduct.CampaignPriceFontSize = firstCampaignsBox.FindElement(By.CssSelector(campaignPriceLocator)).GetCssValue("font-size");
                 mainPageProduct.TagRegularPrice = firstCampaignsBox.FindElement(By.CssSelector(regularPriceLocator)).GetAttribute("tagName");
+                mainPageProduct.TagCampaignPrice = firstCampaignsBox.FindElement(By.CssSelector(campaignPriceLocator)).GetAttribute("tagName");
 
                 firstCampaignsBox.Click();
 
@@ -268,6 +269,7 @@ namespace TestProject
                 pageProduct.RegularPriceFontSize = informationBox.FindElement(By.CssSelector(regularPriceLocator)).GetCssValue("font-size");
                 pageProduct.CampaignPriceFontSize = informationBox.FindElement(By.CssSelector(campaignPriceLocator)).GetCssValue("font-size");
                 pageProduct.TagRegularPrice = informationBox.FindElement(By.CssSelector(regularPriceLocator)).GetAttribute("tagName");
+                pageProduct.TagCampaignPrice = informationBox.FindElement(By.CssSelector(campaignPriceLocator)).GetAttribute("tagName");
 
                 Assert.That(mainPageProduct.ProductName, Is.EqualTo(pageProduct.ProductName), "Имена продукта отличается");
 
@@ -285,6 +287,9 @@ namespace TestProject
 
                 Assert.That(pageProduct.regularPriceColor, Does.Contain("102, 102, 102"), "обычная цена страница продукта цвет отличается");
                 Assert.That(pageProduct.CampaignPriceColor, Does.Contain("204, 0, 0"), "Акционная цена цвет страница продукта");
+
+                Assert.That(mainPageProduct.TagRegularPrice, Is.EqualTo("S"), "Обычная цена не зачеркнута на главной");
+                Assert.That(mainPageProduct.TagRegularPrice, Is.EqualTo("S"), "Обычная цена не зачеркнута на странице продукта");
             }
 
             [TearDown]
