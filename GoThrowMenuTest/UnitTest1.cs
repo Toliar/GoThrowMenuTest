@@ -8,6 +8,7 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.IE;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
+using System.Text.RegularExpressions;
 
 namespace TestProject
 {
@@ -168,8 +169,8 @@ namespace TestProject
                 FirefoxOptions options = new FirefoxOptions();
                 //options.UseLegacyImplementation = true;
                 //options.BrowserExecutableLocation = @"C:\Users\a.rudakov\Downloads\firefoxsdk\bin\firefox.exe";
-           //     options.BrowserExecutableLocation = @"c:\Program Files\Firefox Nightly\firefox.exe";
-            //    driver = new FirefoxDriver(options);
+                //     options.BrowserExecutableLocation = @"c:\Program Files\Firefox Nightly\firefox.exe";
+                //    driver = new FirefoxDriver(options);
 
                 driver = new ChromeDriver();
                 driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
@@ -192,7 +193,7 @@ namespace TestProject
                 foreach (var row in rows)
                 {
                     countryList.Add(row.FindElements(By.CssSelector("td"))[4].Text);
-                    if (row.FindElements(By.CssSelector("td"))[5].Text !="0")
+                    if (row.FindElements(By.CssSelector("td"))[5].Text != "0")
                     {
                         timeZonesForCheck.Add(row.FindElement(By.CssSelector("a")).GetAttribute("href"));
                     }
@@ -200,7 +201,7 @@ namespace TestProject
                 }
                 Assert.That(countryList, Is.Ordered, "Лист не отсортирован");
 
-                for (int j = 0; j< timeZonesForCheck.Count; j++)
+                for (int j = 0; j < timeZonesForCheck.Count; j++)
                 {
                     driver.Url = timeZonesForCheck[j];
                     var rows2 = driver.FindElements(By.CssSelector("form #table-zones tr:not(.header)"));
@@ -210,9 +211,9 @@ namespace TestProject
                     }
                     timeZoneList.RemoveAt(timeZoneList.Count - 1);
 
-                    Assert.That(timeZoneList, Is.Ordered, "Лист зон по ссылке " + timeZonesForCheck[j].ToString()+" не отсортирован");
+                    Assert.That(timeZoneList, Is.Ordered, "Лист зон по ссылке " + timeZonesForCheck[j].ToString() + " не отсортирован");
                     timeZoneList.Clear();
-                }          
+                }
             }
             [TearDown]
             public void stop()
@@ -231,9 +232,9 @@ namespace TestProject
             [SetUp]
             public void start()
             {
-                  FirefoxOptions options = new FirefoxOptions();
-                  options.UseLegacyImplementation = true;
-                driver =new FirefoxDriver();
+                FirefoxOptions options = new FirefoxOptions();
+                options.UseLegacyImplementation = true;
+                driver = new FirefoxDriver();
                 driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(2);
             }
 
@@ -282,15 +283,30 @@ namespace TestProject
                 Assert.That(mainPageProduct.TagRegularPrice, Is.EqualTo("S"), "Обычная цена не зачеркнута на главной");
                 Assert.That(mainPageProduct.TagRegularPrice, Is.EqualTo("S"), "Обычная цена не зачеркнута на странице продукта");
 
-                Assert.That(mainPageProduct.regularPriceColor, Does.Contain("119, 119, 119"), "обычная цена цвет отличается");
-                Assert.That(mainPageProduct.CampaignPriceColor, Does.Contain("204, 0, 0"), "Акционная цена цвет");
+                Assert.That(RGBChannels(mainPageProduct.regularPriceColor)[0], Is.EqualTo(RGBChannels(mainPageProduct.regularPriceColor)[1]).And.EqualTo(RGBChannels(mainPageProduct.regularPriceColor)[2]), "Каналы цвета не одинаковые");
+                Assert.That(RGBChannels(mainPageProduct.CampaignPriceColor)[1], Is.EqualTo("0").And.EqualTo(RGBChannels(mainPageProduct.CampaignPriceColor)[2]), "Акционная цена цвет G B не 0");
 
-                Assert.That(pageProduct.regularPriceColor, Does.Contain("102, 102, 102"), "обычная цена страница продукта цвет отличается");
-                Assert.That(pageProduct.CampaignPriceColor, Does.Contain("204, 0, 0"), "Акционная цена цвет страница продукта");
 
-                Assert.That(mainPageProduct.TagRegularPrice, Is.EqualTo("S"), "Обычная цена не зачеркнута на главной");
-                Assert.That(mainPageProduct.TagRegularPrice, Is.EqualTo("S"), "Обычная цена не зачеркнута на странице продукта");
+                Assert.That(RGBChannels(pageProduct.regularPriceColor)[0], Is.EqualTo(RGBChannels(pageProduct.regularPriceColor)[1]).And.EqualTo(RGBChannels(pageProduct.regularPriceColor)[2]), "Каналы цвета не одинаковые на странице продукта");
+                Assert.That(RGBChannels(pageProduct.CampaignPriceColor)[1], Is.EqualTo("0").And.EqualTo(RGBChannels(pageProduct.CampaignPriceColor)[2]), "Акционная цена цвет G B не 0 на странице продукта");
+
+                Assert.That(mainPageProduct.TagCampaignPrice, Is.EqualTo("STRONG"), "Акционная цена не выделена жирным на странице главной");
+                Assert.That(pageProduct.TagCampaignPrice, Is.EqualTo("STRONG"), "Акционная цена не выделена жирным на странице продукта");
             }
+
+
+
+
+                public string[] RGBChannels(string RGB)
+                {
+                var RGBChannel = Regex.Matches(RGB, @"\d+");
+                string[] rgb = { RGBChannel[0].ToString(), RGBChannel[1].ToString(), RGBChannel[2].ToString() };
+                return rgb;
+                }
+
+
+
+
 
             [TearDown]
             public void stop()
