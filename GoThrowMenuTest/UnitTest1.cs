@@ -183,6 +183,8 @@ namespace TestProject
                 var countryList = new List<string>();
                 List<string> timeZoneList = new List<string>();
                 List<string> timeZonesForCheck = new List<string>();
+                List<string> geoZoneList = new List<string>();
+                List<string> geoZones = new List<string>();
 
                 driver.Url = "http://localhost:8889/litecart/admin/?app=countries&doc=countries";
                 driver.FindElement(By.Name("username")).SendKeys("admin");
@@ -214,7 +216,30 @@ namespace TestProject
                     Assert.That(timeZoneList, Is.Ordered, "Лист зон по ссылке " + timeZonesForCheck[j].ToString() + " не отсортирован");
                     timeZoneList.Clear();
                 }
+
+                driver.Url = "http://localhost:8889/litecart/admin/?app=geo_zones&doc=geo_zones";
+                var rows4 = driver.FindElements(By.CssSelector("table .row"));
+                foreach (var row4 in rows4 )
+                    geoZones.Add(row4.FindElement(By.CssSelector("a")).GetAttribute("href")); 
+
+                for (int j = 0; j < geoZones.Count; j ++)
+                {
+                    driver.Url = geoZones[j];
+                    var rows3 = driver.FindElements(By.CssSelector("form #table-zones tr:not(.header)"));
+                    for (int i=0; i< rows3.Count -1;i++)
+                    {
+                        geoZoneList.Add(rows3[i].FindElements(By.CssSelector("td"))[2].FindElement(By.CssSelector("[selected='selected']")).GetAttribute("textContent"));
+                    }
+                   // geoZoneList.RemoveAt(geoZones.Count);
+
+                    Assert.That(geoZoneList, Is.Ordered, "Лист зон по ссылке " + geoZones[j].ToString() + " не отсортирован");
+                    geoZoneList.Clear();
+                }
             }
+
+
+
+
             [TearDown]
             public void stop()
             {
