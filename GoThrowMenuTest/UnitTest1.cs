@@ -11,12 +11,14 @@ using OpenQA.Selenium.Support.UI;
 using System.Text.RegularExpressions;
 
 namespace TestProject
-{
+{   
+
     [TestFixture]
     public class MyFirstTest
     {
         private IWebDriver driver;
         private WebDriverWait wait;
+
 
         [SetUp]
         public void start()
@@ -219,18 +221,18 @@ namespace TestProject
 
                 driver.Url = "http://localhost:8889/litecart/admin/?app=geo_zones&doc=geo_zones";
                 var rows4 = driver.FindElements(By.CssSelector("table .row"));
-                foreach (var row4 in rows4 )
-                    geoZones.Add(row4.FindElement(By.CssSelector("a")).GetAttribute("href")); 
+                foreach (var row4 in rows4)
+                    geoZones.Add(row4.FindElement(By.CssSelector("a")).GetAttribute("href"));
 
-                for (int j = 0; j < geoZones.Count; j ++)
+                for (int j = 0; j < geoZones.Count; j++)
                 {
                     driver.Url = geoZones[j];
                     var rows3 = driver.FindElements(By.CssSelector("form #table-zones tr:not(.header)"));
-                    for (int i=0; i< rows3.Count -1;i++)
+                    for (int i = 0; i < rows3.Count - 1; i++)
                     {
                         geoZoneList.Add(rows3[i].FindElements(By.CssSelector("td"))[2].FindElement(By.CssSelector("[selected='selected']")).GetAttribute("textContent"));
                     }
-                   // geoZoneList.RemoveAt(geoZones.Count);
+                    // geoZoneList.RemoveAt(geoZones.Count);
 
                     Assert.That(geoZoneList, Is.Ordered, "Лист зон по ссылке " + geoZones[j].ToString() + " не отсортирован");
                     geoZoneList.Clear();
@@ -322,12 +324,12 @@ namespace TestProject
 
 
 
-                public string[] RGBChannels(string RGB)
-                {
+            public string[] RGBChannels(string RGB)
+            {
                 var RGBChannel = Regex.Matches(RGB, @"\d+");
                 string[] rgb = { RGBChannel[0].ToString(), RGBChannel[1].ToString(), RGBChannel[2].ToString() };
                 return rgb;
-                }
+            }
 
 
 
@@ -343,5 +345,78 @@ namespace TestProject
 
         }
 
+    }
+
+    [TestFixture]
+    public class Regisratration
+    {
+        private IWebDriver driver;
+        private WebDriverWait wait;
+        public static Random random = new Random();
+        public static string RandomString(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+              .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        [SetUp]
+        public void start()
+        {
+
+           // FirefoxOptions options = new FirefoxOptions();
+      //      options.UseLegacyImplementation = true;
+            driver = new ChromeDriver();
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(2);
+        }
+        [Test]
+        public void RegisratrationTest()
+        {
+
+            UserData User = new UserData() { FName = RandomString(3), LName = RandomString(5), Address = RandomString(10), City = RandomString(5),Password=RandomString(6) };
+            User.Country = "United States";
+            User.Phone = "123451";
+            User.Postcode = "12345";
+            User.Email = RandomString(8) + User.Email;
+
+            driver.Url = "http://localhost:8889/litecart/en/";
+            driver.FindElement(By.CssSelector("[name='login_form'] a")).Click();
+            var catable = driver.FindElement(By.CssSelector("[name = 'customer_form'] tbody"));
+
+            catable.FindElement(By.CssSelector("[name='firstname']")).SendKeys(User.FName);
+            catable.FindElement(By.CssSelector("[name='lastname']")).SendKeys(User.LName);
+            catable.FindElement(By.CssSelector("[name='address1']")).SendKeys(User.Address);
+            catable.FindElement(By.CssSelector("[name='postcode']")).SendKeys(User.Postcode);
+            catable.FindElement(By.CssSelector("[name='city']")).SendKeys(User.City);
+            catable.FindElement(By.CssSelector("[name='email']")).SendKeys(User.Email);
+            catable.FindElement(By.CssSelector("[name='phone']")).SendKeys(User.Phone);
+            catable.FindElement(By.CssSelector("[name='password']")).SendKeys(User.Password);
+            catable.FindElement(By.CssSelector("[name='confirmed_password']")).SendKeys(User.Password);
+
+            IWebElement Country = catable.FindElement(By.CssSelector("[name = 'country_code']"));
+            SelectElement selectCountry = new SelectElement(Country);
+            selectCountry.SelectByText(User.Country);
+
+            driver.FindElement(By.CssSelector("[name=create_account]")).Click();
+
+         //   Логаут
+            driver.FindElement(By.CssSelector(".left a[href*=logout]")).Click();
+
+            driver.FindElement(By.CssSelector("[name=email]")).SendKeys(User.Email);
+            driver.FindElement(By.CssSelector("[name=password]")).SendKeys(User.Password);
+            driver.FindElement(By.CssSelector("[name='login_form'] [value='Login']")).Click();
+
+            //   Логаут
+            driver.FindElement(By.CssSelector(".left a[href*=logout]")).Click();
+
+        }
+
+
+        [TearDown]
+        public void stop()
+        {
+            driver?.Quit();
+            driver = null;
+        }
     }
 }
