@@ -11,7 +11,7 @@ using OpenQA.Selenium.Support.UI;
 using System.Text.RegularExpressions;
 
 namespace TestProject
-{   
+{
 
     [TestFixture]
     public class MyFirstTest
@@ -275,7 +275,7 @@ namespace TestProject
                 var regularPriceLocator = ".regular-price";
                 var campaignPriceLocator = ".campaign-price";
 
-                mainPageProduct.ProductName = firstCampaignsBox.FindElement(By.CssSelector(".name")).GetAttribute("textContent");
+                mainPageProduct.Name = firstCampaignsBox.FindElement(By.CssSelector(".name")).GetAttribute("textContent");
                 mainPageProduct.RegularPrice = firstCampaignsBox.FindElement(By.CssSelector(regularPriceLocator)).GetAttribute("textContent");
                 mainPageProduct.CampaignPrice = firstCampaignsBox.FindElement(By.CssSelector(campaignPriceLocator)).GetAttribute("textContent");
                 mainPageProduct.regularPriceColor = firstCampaignsBox.FindElement(By.CssSelector(regularPriceLocator)).GetCssValue("color");
@@ -289,7 +289,7 @@ namespace TestProject
 
                 var informationBox = driver.FindElement(By.CssSelector(".content .information"));
 
-                pageProduct.ProductName = driver.FindElement(By.CssSelector("#box-product h1")).GetAttribute("textContent");
+                pageProduct.Name = driver.FindElement(By.CssSelector("#box-product h1")).GetAttribute("textContent");
                 pageProduct.RegularPrice = informationBox.FindElement(By.CssSelector(regularPriceLocator)).GetAttribute("textContent");
                 pageProduct.CampaignPrice = informationBox.FindElement(By.CssSelector(campaignPriceLocator)).GetAttribute("textContent");
                 pageProduct.regularPriceColor = informationBox.FindElement(By.CssSelector(regularPriceLocator)).GetCssValue("color");
@@ -299,7 +299,7 @@ namespace TestProject
                 pageProduct.TagRegularPrice = informationBox.FindElement(By.CssSelector(regularPriceLocator)).GetAttribute("tagName");
                 pageProduct.TagCampaignPrice = informationBox.FindElement(By.CssSelector(campaignPriceLocator)).GetAttribute("tagName");
 
-                Assert.That(mainPageProduct.ProductName, Is.EqualTo(pageProduct.ProductName), "Имена продукта отличается");
+                Assert.That(mainPageProduct.Name, Is.EqualTo(pageProduct.Name), "Имена продукта отличается");
 
                 Assert.That(mainPageProduct.RegularPrice, Is.EqualTo(pageProduct.RegularPrice), "обычная цена продукта отличается");
                 Assert.That(mainPageProduct.CampaignPrice, Is.EqualTo(pageProduct.CampaignPrice), "обычная цена продукта отличается");
@@ -364,16 +364,18 @@ namespace TestProject
         public void start()
         {
 
-           // FirefoxOptions options = new FirefoxOptions();
-      //      options.UseLegacyImplementation = true;
+             FirefoxOptions options = new FirefoxOptions();
+                options.UseLegacyImplementation = true;
+            
             driver = new ChromeDriver();
+            driver.Manage().Window.Maximize();
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(2);
         }
         [Test]
         public void RegisratrationTest()
         {
 
-            UserData User = new UserData() { FName = RandomString(3), LName = RandomString(5), Address = RandomString(10), City = RandomString(5),Password=RandomString(6) };
+            UserData User = new UserData() { FName = RandomString(3), LName = RandomString(5), Address = RandomString(10), City = RandomString(5), Password = RandomString(6) };
             User.Country = "United States";
             User.Phone = "123451";
             User.Postcode = "12345";
@@ -399,7 +401,7 @@ namespace TestProject
 
             driver.FindElement(By.CssSelector("[name=create_account]")).Click();
 
-         //   Логаут
+            //   Логаут
             driver.FindElement(By.CssSelector(".left a[href*=logout]")).Click();
 
             driver.FindElement(By.CssSelector("[name=email]")).SendKeys(User.Email);
@@ -418,5 +420,84 @@ namespace TestProject
             driver?.Quit();
             driver = null;
         }
+    }
+
+    [TestFixture]
+    public class CreateItem
+    {
+        private IWebDriver driver;
+        private WebDriverWait wait;
+        public static Random random = new Random();
+        public static string RandomString(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+              .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        [SetUp]
+        public void start()
+        {
+
+            // FirefoxOptions options = new FirefoxOptions();
+            //      options.UseLegacyImplementation = true;
+            driver = new ChromeDriver();
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(4);
+        }
+        [Test]
+        public void CreateItemTest()
+        {
+            ProductData product = new ProductData();
+            product.Name = RandomString(3) + " duck";
+            product.Code = "123";
+            product.RegularPrice = "123";
+            product.Keywords = RandomString(4) + RandomString(4) + RandomString(4);
+            product.Description = RandomString(4);
+
+
+
+            driver.Url = "http://localhost:8889/litecart/admin/";
+            driver.FindElement(By.Name("username")).SendKeys("admin");
+            driver.FindElement(By.Name("password")).SendKeys("admin");
+            driver.FindElement(By.Name("login")).Click();
+
+            driver.FindElements(By.CssSelector(".name"))[1].Click();
+            driver.FindElements(By.CssSelector("#content div a"))[1].Click();
+
+            var general = driver.FindElement(By.CssSelector(".content #tab-general"));
+            general.FindElement(By.CssSelector("[name='name[en]']")).SendKeys(product.Name);
+            general.FindElement(By.CssSelector("[name='code']")).SendKeys(product.Code);
+            general.FindElement(By.CssSelector("input[type=file]")).SendKeys(Environment.CurrentDirectory + product.Image);
+
+            var info = driver.FindElement(By.CssSelector("a[href*=information]"));
+            info.Click();
+            info = driver.FindElement(By.CssSelector("div#tab-information"));
+            SelectElement selectManufacter = new SelectElement(info.FindElement(By.CssSelector("[name=manufacturer_id]")));
+            selectManufacter.SelectByValue("1");
+            info.FindElement(By.CssSelector("[name=keywords]")).SendKeys(product.Keywords);
+            info.FindElement(By.CssSelector(".trumbowyg-editor")).SendKeys(product.Description);
+
+            var pricesTab = driver.FindElement(By.CssSelector("#content .index a[href*=prices]"));
+            pricesTab.Click();
+
+            var pricesTabContent = driver.FindElement(By.CssSelector("div#tab-prices"));
+            var price = pricesTabContent.FindElement(By.CssSelector("input[name=purchase_price]"));
+            price.Clear();
+            price.SendKeys(product.RegularPrice);
+            new SelectElement(pricesTabContent.FindElement(By.CssSelector("select[name=purchase_price_currency_code]"))).SelectByValue("USD");
+            // Сохраняем товар
+            driver.FindElement(By.CssSelector("button[name=save]")).Click();
+            // Проверяем, что отображается в админке
+            var createdProduct = driver.FindElement(By.XPath($"//form[@name='catalog_form']//a[text()='{product.Name}']"));
+            Assert.That(createdProduct.Displayed, Is.True, "Не отображается созданный товар!");
+
+        }
+        [TearDown]
+        public void stop()
+        {
+            driver?.Quit();
+            driver = null;
+        }
+
     }
 }
