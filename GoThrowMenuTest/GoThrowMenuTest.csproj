@@ -66,6 +66,14 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Framework\App\LiteCartApp.cs" />
+    <Compile Include="Framework\Pages\AdminLoginPage.cs" />
+    <Compile Include="Framework\Pages\BasePage.cs" />
+    <Compile Include="Framework\Pages\CartPage.cs" />
+    <Compile Include="Framework\Pages\ProductPage.cs" />
+    <Compile Include="Framework\Pages\StorePage.cs" />
+    <Compile Include="Framework\Tests\BaseTest.cs" />
+    <Compile Include="Framework\Tests\CartTest.cs" />
     <Compile Include="Product.cs" />
     <Compile Include="UnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,6 +82,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
