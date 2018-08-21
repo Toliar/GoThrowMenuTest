@@ -600,4 +600,50 @@ namespace TestProject
                 return newWindow.Any() ? newWindow : null;
             }
         }
+
+    class Case17BrowerLog 
+    {
+        IWebDriver driver;
+        private WebDriverWait wait;
+        string adminUrl = "http://localhost:8889/litecart/admin/";
+        [SetUp]
+        public void BeforeTest()
+        {
+            driver = new ChromeDriver();
+            driver.Manage().Window.Maximize();
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
+            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+        }
+        [Test]
+        public void BrowserLogTest()
+        {
+            //Step 1
+            driver.Url = "http://localhost:8889/litecart/admin/";
+            driver.FindElement(By.Name("username")).SendKeys("admin");
+            driver.FindElement(By.Name("password")).SendKeys("admin");
+            driver.FindElement(By.Name("login")).Click();
+
+            //Step 2
+            driver.Navigate().GoToUrl("http://localhost:8889/litecart/admin/" + "?app=catalog&doc=catalog&category_id=1");
+
+            //Step 3
+            var productsLocator = By.CssSelector(".dataTable .row td:nth-of-type(3) a[href*='product_id']");
+            int productsCount = driver.FindElements(productsLocator).Count;
+            for (int i = 0; i < productsCount; i++)
+            {
+                driver.FindElements(productsLocator)[i].Click();
+                var logs = driver.Manage().Logs.GetLog("browser");
+
+                Assert.That(logs, Is.Empty);
+                driver.Navigate().Back();
+            }
+        }
+
+                   [TearDown]
+        public void AfterTest()
+        {
+            driver.Quit();
+            driver = null;
+        }
+    }
     }
